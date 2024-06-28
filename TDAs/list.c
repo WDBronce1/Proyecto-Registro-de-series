@@ -188,7 +188,8 @@ void list_clean(List *L) {
   L->current = NULL;
 }
 
-int list_size(List *L) {
+int list_size(List *L) 
+{
     int count = 0;
     void *item = list_first(L);
     while (item != NULL) {

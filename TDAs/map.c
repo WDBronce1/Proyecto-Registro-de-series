@@ -66,9 +66,11 @@ MapPair *map_remove(Map *map, void *key) {
   return NULL;
 }
 
-MapPair *map_search(Map *map, void *key) {
+MapPair *map_search(Map *map, void *key) 
+{
   for (MapPair *pair = list_first(map->ls); pair != NULL;
-       pair = list_next(map->ls)) {
+       pair = list_next(map->ls)) 
+  {
     if (_is_equal(map, pair, key))
       return pair;
   }

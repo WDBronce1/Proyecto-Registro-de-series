@@ -1,5 +1,3 @@
-// gcc TDAs/*.c Funciones_Principales.c main.c -o Registro_de_series
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,9 +8,8 @@
 #include "TDAs/list.h"
 #include "TDAs/map.h"
 #include "TDAs/Priority_Queue.h"
+#include "TDAs/queue.h"
 
-
-// Estructuras
 typedef struct {
     char *Nombre;
     List *Temporadas;
@@ -36,7 +33,6 @@ typedef struct {
 } Capitulo;
 
 
-// FUNCIONES AUXILIARES *********************************************
 int is_equal_str(void *key1, void *key2) 
 {
   return strcmp((char *)key1, (char *)key2) == 0;
@@ -45,25 +41,19 @@ int is_equal_str(void *key1, void *key2)
 void EnterContinuar()
 {
     printf("Presione Enter para continuar...");
-    getchar(); // Espera a que el usuario presione Enter
-    getchar(); // Consumo del Enter que se presionó
+    getchar(); 
+    getchar(); 
 }
-//********************************************************************
 
-void IngresarSerie(Map *ListaSeries)
-{
-    // Asignar memoria para la nueva serie
-    Serie *NuevaSerie = (Serie*)malloc(sizeof(Serie));
-    if (NuevaSerie == NULL) 
-    {
+void IngresarSerie(Map *ListaSeries) {
+    Serie *NuevaSerie = (Serie *)malloc(sizeof(Serie));
+    if (NuevaSerie == NULL) {
         printf("Error al asignar memoria para la nueva serie\n");
         return;
     }
 
-    // Asignar memoria para el nombre de la serie
-    NuevaSerie->Nombre = (char*)malloc(70 * sizeof(char));
-    if (NuevaSerie->Nombre == NULL) 
-    {
+    NuevaSerie->Nombre = (char *)malloc(70 * sizeof(char));
+    if (NuevaSerie->Nombre == NULL) {
         printf("Error al asignar memoria para el nombre de la serie\n");
         free(NuevaSerie);
         return;
@@ -74,14 +64,12 @@ void IngresarSerie(Map *ListaSeries)
     int capitulos;
     int tiempo;
 
-    // Se ingresan los valores de la nueva serie
     printf("Ingrese el nombre de la serie: \n");
-    getchar(); // Para consumir el carácter de nueva línea pendiente
+    getchar();
     fgets(Nombre, sizeof(Nombre), stdin);
     Nombre[strcspn(Nombre, "\n")] = '\0';
 
-    if (map_search(ListaSeries, Nombre) != NULL) 
-    {
+    if (map_search(ListaSeries, Nombre) != NULL) {
         printf("La serie con el nombre '%s' ya existe en el registro.\n", Nombre);
         free(NuevaSerie->Nombre);
         free(NuevaSerie);
@@ -108,11 +96,10 @@ void IngresarSerie(Map *ListaSeries)
     scanf("%d", &tiempo);
 
     NuevaSerie->Duracion = 0;
+    NuevaSerie->TiempoVisto = 0;
 
-    // Se ingresan los valores de cada temporada
-    for(int i = 0; i < Temporadas; i++)
-    {
-        Temporada *Tempo = (Temporada*)malloc(sizeof(Temporada));
+    for (int i = 0; i < Temporadas; i++) {
+        Temporada *Tempo = (Temporada *)malloc(sizeof(Temporada));
         if (Tempo == NULL) {
             printf("Error al asignar memoria para la temporada\n");
             continue;
@@ -125,11 +112,11 @@ void IngresarSerie(Map *ListaSeries)
             continue;
         }
         Tempo->Completada = false;
-        Tempo->Duracion = 0; // Inicializamos la duración de la temporada
+        Tempo->Duracion = 0;
+        Tempo->TiempoVisto = 0;
 
-        for(int j = 0; j < capitulos; j++)
-        {
-            Capitulo *Cap = (Capitulo*)malloc(sizeof(Capitulo));
+        for (int j = 0; j < capitulos; j++) {
+            Capitulo *Cap = (Capitulo *)malloc(sizeof(Capitulo));
             if (Cap == NULL) {
                 printf("Error al asignar memoria para el capítulo\n");
                 continue;
@@ -138,7 +125,7 @@ void IngresarSerie(Map *ListaSeries)
             Cap->Duracion = tiempo;
             Cap->Completado = false;
             list_pushBack(Tempo->Capitulos, Cap);
-            Tempo->Duracion += tiempo; // Sumamos la duración del capítulo a la temporada
+            Tempo->Duracion += tiempo;
         }
         list_pushBack(NuevaSerie->Temporadas, Tempo);
         NuevaSerie->Duracion += Tempo->Duracion;
@@ -146,18 +133,14 @@ void IngresarSerie(Map *ListaSeries)
 
     map_insert(ListaSeries, NuevaSerie->Nombre, NuevaSerie);
     printf("La serie '%s' ha sido agregada al registro.\n", NuevaSerie->Nombre);
-    free(NuevaSerie);
     EnterContinuar();
 }
 
 
-//**************************************************************
-//Funcion propia 2
-void IngresarEspecial(Map *ListaSeries)
-{
+void IngresarEspecial(Map *ListaSeries) {
     char Nombre[70];
     printf("Ingrese el nombre de la serie: \n");
-    getchar(); // Para consumir el carácter de nueva línea pendiente
+    getchar();
     fgets(Nombre, sizeof(Nombre), stdin);
     Nombre[strcspn(Nombre, "\n")] = '\0';
 
@@ -169,7 +152,6 @@ void IngresarEspecial(Map *ListaSeries)
     int tiempo;
     scanf("%d", &tiempo);
 
-    // Buscar la serie en el mapa
     MapPair *seriePair = map_search(ListaSeries, Nombre);
     if (seriePair == NULL) {
         printf("No se encontró la serie especificada.\n");
@@ -178,7 +160,6 @@ void IngresarEspecial(Map *ListaSeries)
     }
     Serie *serieBuscada = (Serie *)seriePair->value;
 
-    // Buscar la temporada específica
     Temporada *temporada = NULL;
     Temporada *temp = list_first(serieBuscada->Temporadas);
     while (temp != NULL) {
@@ -191,20 +172,20 @@ void IngresarEspecial(Map *ListaSeries)
 
     if (temporada == NULL) {
         printf("No se encontró la temporada especificada.\n");
+        EnterContinuar();
         return;
     }
 
-    // Crear el nuevo capítulo especial
     Capitulo *nuevoCap = (Capitulo *)malloc(sizeof(Capitulo));
     if (nuevoCap == NULL) {
         printf("Error al asignar memoria para el capítulo especial.\n");
+        EnterContinuar();
         return;
     }
     nuevoCap->Numero = list_size(temporada->Capitulos) + 1;
     nuevoCap->Duracion = tiempo;
     nuevoCap->Completado = false;
 
-    // Agregar el nuevo capítulo a la lista de capítulos de la temporada
     list_pushBack(temporada->Capitulos, nuevoCap);
     temporada->Duracion += tiempo;
     serieBuscada->Duracion += tiempo;
@@ -213,188 +194,133 @@ void IngresarEspecial(Map *ListaSeries)
     EnterContinuar();
 }
 
-
-//*************************************************************
-//Funcion propia 3
-//en revision
-
 void SeriesSinTerminar(Map *ListaSeries)
 {
-    
-}
+    printf("Series sin terminar:\n");
+    MapPair *Aux = map_first(ListaSeries);
+    while (Aux != NULL)
+        {
+            Serie *SerieActual = (Serie *)Aux->value;
+            if (SerieActual->Completada == false)
+            {
+                printf("La serie %s no ha terminado todavía\n", SerieActual->Nombre);
+                printf("Tiempo Faltante: %d minutos\n", SerieActual->Duracion - SerieActual->TiempoVisto);
+            }
+            Aux = map_next(ListaSeries);
+        }
 
-
-//*************************************************************
-//Funcion propia 4
-//en revision
-
-void SeriesCompletas(Map *ListaSeries)
-{
-  /*
-  int SeriesCompletadas=0;
-  while(ListaSeries !=NULL)
-    {
-      if (Series->Completado==true)
-        SeriesCompletadas++;
-
-      printf("%c, Tiempo de la serie = %d minutos.",Series->Nombre, Series->Duracion);
-    }
-  printf("Cantidad de series completadas = %d minutos.",SeriesCompletadas);
-
-  printf("Tiempo de las series completadas = %d minutos.",SeriesCompletadas*Series->Duracion); 
-  */
-}
-//*************************************************************
-//Funcion propia 5
-//en revision
-void AvanceSerie(Map *ListaSeries) 
-{
-  MapPair *Aux;
-
-  char nombreSerie[70];
-  printf("Ingrese el nombre de la serie: ");
-  getchar();
-  fgets(nombreSerie, sizeof(nombreSerie), stdin);
-  nombreSerie[strcspn(nombreSerie, "\n")] = '\0';
-
-  Aux = map_search(ListaSeries, nombreSerie);
-  if (Aux == NULL)
-  {
-    printf("No se encontró la serie especificada.\n");
     EnterContinuar();
-    return;
-  }
-  Serie *serie = (Serie *)Aux->value;
-  printf("Avance de la Serie: %s\n", serie->Nombre);
-  printf("Minutos Vistos = %d\n", serie->TiempoVisto);
-  printf("Minutos Restantes = %d\n", (serie->Duracion - serie->TiempoVisto) );
-  if(serie->Completada == true)
-  {
-    printf("------ SERIE COMPLETADA ------\n");
-  }
-  else
-  {
-    printf("------ SERIE EN PROGRESO ------\n");
-  }
+}
 
-  EnterContinuar();
-  
 
-  
-  /*
-  while (Aux != NULL) 
-  {
-    
-    Serie *serie = (Serie *)Aux->value;
-    
-    if (strcmp(serie->Nombre, nombreSerie) == 0) 
-    {
-      int minutosVistos = 0;
-      int minutosFaltantes = 0;
+void SeriesCompletas(Map *ListaSeries) {
+    int SeriesCompletadas = 0;
+    MapPair *Aux = map_first(ListaSeries);
 
-      printf("Avance de la serie: %s\n", serie->Nombre);
-
-      Temporada *temporada = list_first(serie->Temporadas);
-
-      while (temporada != NULL) 
-      {
-        minutosVistos += temporada->TiempoVisto;
-        minutosFaltantes += temporada->Duracion - temporada->TiempoVisto;
-
-        temporada = temporada +1;
-      }
-
-      printf("Minutos vistos: %d\n", minutosVistos);
-      printf("Minutos faltantes: %d\n", minutosFaltantes);
-
-      return;
-      EnterContinuar();
+    while (Aux != NULL) {
+        Serie *Series = (Serie *)Aux->value;
+        if (Series->Completada) {
+            SeriesCompletadas++;
+            printf("Serie: %s, Tiempo de la serie = %d minutos\n", Series->Nombre, Series->Duracion);
+        }
+        Aux = map_next(ListaSeries);
     }
-      
-    Aux = map_next(ListaSeries);
-  }*/
+    printf("Cantidad de series completadas = %d\n", SeriesCompletadas);
+    EnterContinuar();
 }
-//*************************************************************
-//Funcion propia 6
-//en revision
-void ActualizarSerie(Map *ListaSeries)
-{
 
-  char Nombre[70];
-  printf("Ingrese el nombre de la serie: \n");
-  getchar(); // Para consumir el carácter de nueva línea pendiente
-  fgets(Nombre, sizeof(Nombre), stdin);
-  Nombre[strcspn(Nombre, "\n")] = '\0';
+void AvanceSerie(Map *ListaSeries) {
+    char nombreSerie[70];
+    printf("Ingrese el nombre de la serie: ");
 
-  // Buscar la serie en el mapa
-  MapPair *seriePair = map_search(ListaSeries, Nombre);
-  if (seriePair == NULL) {
-      printf("No se encontró la serie especificada.\n");
-      return;
-  }
-  Serie *serieBuscada = (Serie *)seriePair->value;
+    fgets(nombreSerie, sizeof(nombreSerie), stdin);
+    nombreSerie[strcspn(nombreSerie, "\n")] = '\0';
 
-  printf("Ingrese la cantidad de capítulos que ha visto: ");
-  int capitulosVistos;
-  scanf("%d", &capitulosVistos);
+    MapPair *Aux = map_search(ListaSeries, nombreSerie);
+    if (Aux == NULL) {
+        printf("No se encontró la serie especificada.\n");
+        EnterContinuar();
+        return;
+    }
+    Serie *serie = (Serie *)Aux->value;
+    printf("Avance de la Serie: %s\n", serie->Nombre);
+    printf("Minutos Vistos = %d\n", serie->TiempoVisto);
+    printf("Minutos Restantes = %d\n", serie->Duracion - serie->TiempoVisto);
+    if (serie->Completada) {
+        printf("------ SERIE COMPLETADA ------\n");
+    } else {
+        printf("------ SERIE EN PROGRESO ------\n");
+    }
 
-  int capitulosRestantes = capitulosVistos;
-  Temporada *temporada = list_first(serieBuscada->Temporadas);
-
-  while (temporada != NULL && capitulosRestantes > 0) {
-      Capitulo *capitulo = list_first(temporada->Capitulos);
-      while (capitulo != NULL && capitulosRestantes > 0) {
-          if (!capitulo->Completado) {
-              capitulo->Completado = true;
-              serieBuscada->Duracion -= capitulo->Duracion;
-              temporada->Duracion -= capitulo->Duracion;
-              capitulosRestantes--;
-          }
-          capitulo = list_next(temporada->Capitulos);
-      }
-
-      // Verificar si la temporada está completada
-      bool temporadaCompletada = true;
-      capitulo = list_first(temporada->Capitulos);
-      while (capitulo != NULL) {
-          if (!capitulo->Completado) {
-              temporadaCompletada = false;
-              break;
-          }
-          capitulo = list_next(temporada->Capitulos);
-      }
-      temporada->Completada = temporadaCompletada;
-
-      temporada = list_next(serieBuscada->Temporadas);
-  }
-
-  // Verificar si la serie está completada
-  bool serieCompletada = true;
-  temporada = list_first(serieBuscada->Temporadas);
-  while (temporada != NULL) {
-      if (!temporada->Completada) {
-          serieCompletada = false;
-          break;
-      }
-      temporada = list_next(serieBuscada->Temporadas);
-  }
-  serieBuscada->Completada = serieCompletada;
-
-  if (serieCompletada) {
-      printf("¡Felicidades! Ha completado la serie '%s'.\n", serieBuscada->Nombre);
-  } else {
-      printf("Actualización realizada. Aún tiene capítulos por ver en la serie '%s'.\n", serieBuscada->Nombre);
-  }
-
-  EnterContinuar();
+    EnterContinuar();
 }
-//*************************************************************
 
+void ActualizarSerie(Map *ListaSeries) {
+    char Nombre[70];
+    printf("Ingrese el nombre de la serie:\n");
+    fgets(Nombre, sizeof(Nombre), stdin);
+    Nombre[strcspn(Nombre, "\n")] = '\0';
 
+    MapPair *seriePair = map_search(ListaSeries, Nombre);
+    if (seriePair == NULL) {
+        printf("No se encontró la serie especificada.\n");
+        EnterContinuar();
+        return;
+    }
+    Serie *serieBuscada = (Serie *)seriePair->value;
 
+    printf("Ingrese la cantidad de capítulos que ha visto: ");
+    int capitulosVistos;
+    scanf("%d", &capitulosVistos);
 
+    int capitulosRestantes = capitulosVistos;
+    Temporada *temporada = list_first(serieBuscada->Temporadas);
 
-///////////////////////////////////////////////////////////////////////////
+    while (temporada != NULL && capitulosRestantes > 0) {
+        Capitulo *capitulo = list_first(temporada->Capitulos);
+        while (capitulo != NULL && capitulosRestantes > 0) {
+            if (!capitulo->Completado) {
+                capitulo->Completado = true;
+                serieBuscada->TiempoVisto += capitulo->Duracion;
+                capitulosRestantes--;
+            }
+            capitulo = list_next(temporada->Capitulos);
+        }
+
+        bool temporadaCompletada = true;
+        capitulo = list_first(temporada->Capitulos);
+        while (capitulo != NULL) {
+            if (!capitulo->Completado) {
+                temporadaCompletada = false;
+                break;
+            }
+            capitulo = list_next(temporada->Capitulos);
+        }
+        temporada->Completada = temporadaCompletada;
+
+        temporada = list_next(serieBuscada->Temporadas);
+    }
+
+    bool serieCompletada = true;
+    temporada = list_first(serieBuscada->Temporadas);
+    while (temporada != NULL) {
+        if (!temporada->Completada) {
+            serieCompletada = false;
+            break;
+        }
+        temporada = list_next(serieBuscada->Temporadas);
+    }
+    serieBuscada->Completada = serieCompletada;
+
+    if (serieCompletada) {
+        printf("¡Felicidades! Ha completado la serie '%s'.\n", serieBuscada->Nombre);
+    } else {
+        printf("Actualización realizada. Aún tiene capítulos por ver en la serie '%s'.\n", serieBuscada->Nombre);
+    }
+
+    EnterContinuar();
+}
+
 
 void mostrarMenuPrincipal() 
 {
@@ -445,13 +371,14 @@ int main(void)
   List *SeriesTerminadas = list_create();
   do 
     {
-    mostrarMenuPrincipal();
-    printf("Ingrese su opción: ");
-    scanf(" %c", &opcion);
+      opcionAux = 0;
+      mostrarMenuPrincipal();
+      printf("Ingrese su opción: ");
+      scanf(" %c", &opcion);
 
-    switch (opcion) 
-    {
-    case '1':
+      switch (opcion) 
+      {
+      case '1':
       {
         opcionAux = 0;
         mostrarMenu1();
@@ -497,30 +424,25 @@ int main(void)
         puts("        Registro de Series");
         puts("========================================");
         puts("Ver el avance de una serie");
-        printf("Ingrese el nombre de la serie: ");
         fgets(Nombre, sizeof(Nombre), stdin);
-        getchar();
         AvanceSerie(ListaSeries);
         break;
       }
       break;
-      case '4':
+    case '4':
         {
           limpiarPantalla();
           puts("========================================");
           puts("        Registro de Series");
           puts("========================================");
           puts("Actualizar el avance de una serie");
-          printf("Ingrese el nombre de la serie: ");
           fgets(Nombre, sizeof(Nombre), stdin);
-          getchar();
           ActualizarSerie(ListaSeries);
           break;
         }
     default:
       break;
     }
-      //presioneTeclaParaContinuar();
 
     } while (opcion != '5');
   return 0;
