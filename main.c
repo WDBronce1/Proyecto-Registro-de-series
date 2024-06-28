@@ -194,21 +194,55 @@ void IngresarEspecial(Map *ListaSeries) {
     EnterContinuar();
 }
 
-void SeriesSinTerminar(Map *ListaSeries)
-{
-    printf("Series sin terminar:\n");
-    MapPair *Aux = map_first(ListaSeries);
-    while (Aux != NULL)
-        {
-            Serie *SerieActual = (Serie *)Aux->value;
-            if (SerieActual->Completada == false)
-            {
-                printf("La serie %s no ha terminado todavía\n", SerieActual->Nombre);
-                printf("Tiempo Faltante: %d minutos\n", SerieActual->Duracion - SerieActual->TiempoVisto);
-            }
-            Aux = map_next(ListaSeries);
-        }
+int compararTiempoFaltante(const void *a, const void *b) {
+    Serie *serieA = *(Serie **)a;
+    Serie *serieB = *(Serie **)b;
 
+    int tiempoFaltanteA = serieA->Duracion - serieA->TiempoVisto;
+    int tiempoFaltanteB = serieB->Duracion - serieB->TiempoVisto;
+
+    return tiempoFaltanteA - tiempoFaltanteB;
+}
+
+void SeriesSinTerminar(Map *ListaSeries) {
+    
+    int numSeriesSinTerminar = 0;
+
+    MapPair *aux = map_first(ListaSeries);
+    while (aux != NULL) {
+        Serie *serieActual = (Serie *)aux->value;
+        if (!serieActual->Completada) {
+            numSeriesSinTerminar++;
+        }
+        aux = map_next(ListaSeries);
+    }
+
+    Serie **seriesSinTerminar = (Serie **)malloc(numSeriesSinTerminar * sizeof(Serie *));
+    if (seriesSinTerminar == NULL) {
+        printf("Error: No se pudo asignar memoria para la lista temporal.\n");
+        return;
+    }
+
+    int index = 0;
+    aux = map_first(ListaSeries);
+    while (aux != NULL) {
+        Serie *serieActual = (Serie *)aux->value;
+        if (!serieActual->Completada) {
+            seriesSinTerminar[index++] = serieActual;
+        }
+        aux = map_next(ListaSeries);
+    }
+
+    qsort(seriesSinTerminar, numSeriesSinTerminar, sizeof(Serie *), compararTiempoFaltante);
+
+    printf("Series sin terminar (ordenadas de menor a mayor tiempo faltante):\n");
+    for (int i = 0; i < numSeriesSinTerminar; i++) {
+        Serie *serie = seriesSinTerminar[i];
+        printf("La serie '%s' no ha terminado todavía\n", serie->Nombre);
+        printf("Tiempo Faltante: %d minutos\n", serie->Duracion - serie->TiempoVisto);
+    }
+
+    free(seriesSinTerminar); 
     EnterContinuar();
 }
 
@@ -416,6 +450,7 @@ int main(void)
           {
             break;
           }
+        break;
       }
     case '3':
       {
