@@ -32,12 +32,13 @@ typedef struct {
     bool Completado;
 } Capitulo;
 
-
+//Esta función compara dos strings (char *) para determinar si son iguales.
 int is_equal_str(void *key1, void *key2) 
 {
   return strcmp((char *)key1, (char *)key2) == 0;
 }
 
+//Imprime un mensaje y espera a que el usuario presione Enter dos veces para continuar.
 void EnterContinuar()
 {
     printf("Presione Enter para continuar...");
@@ -45,6 +46,7 @@ void EnterContinuar()
     getchar(); 
 }
 
+//Permite al usuario ingresar una nueva serie con detalles como nombre, cantidad de temporadas, cantidad de capítulos por temporada y duración de cada capítulo.
 void IngresarSerie(Map *ListaSeries) {
     Serie *NuevaSerie = (Serie *)malloc(sizeof(Serie));
     if (NuevaSerie == NULL) {
@@ -136,7 +138,7 @@ void IngresarSerie(Map *ListaSeries) {
     EnterContinuar();
 }
 
-
+//Permite al usuario ingresar un capítulo especial para una serie existente especificando el nombre de la serie, número de temporada y duración del especial.
 void IngresarEspecial(Map *ListaSeries) {
     char Nombre[70];
     printf("Ingrese el nombre de la serie: \n");
@@ -194,6 +196,7 @@ void IngresarEspecial(Map *ListaSeries) {
     EnterContinuar();
 }
 
+//Función de comparación utilizada en la ordenación (qsort) de las series según el tiempo restante para completarlas.
 int compararTiempoFaltante(const void *a, const void *b) {
     Serie *serieA = *(Serie **)a;
     Serie *serieB = *(Serie **)b;
@@ -204,6 +207,7 @@ int compararTiempoFaltante(const void *a, const void *b) {
     return tiempoFaltanteA - tiempoFaltanteB;
 }
 
+//Lista las series que no han sido completadas ordenadas por el tiempo faltante para terminarlas.
 void SeriesSinTerminar(Map *ListaSeries) {
     
     int numSeriesSinTerminar = 0;
@@ -246,7 +250,7 @@ void SeriesSinTerminar(Map *ListaSeries) {
     EnterContinuar();
 }
 
-
+//Imprime las series que ya han sido completadas junto con su duración total.
 void SeriesCompletas(Map *ListaSeries) {
     int SeriesCompletadas = 0;
     MapPair *Aux = map_first(ListaSeries);
@@ -263,6 +267,7 @@ void SeriesCompletas(Map *ListaSeries) {
     EnterContinuar();
 }
 
+//Muestra el avance actual de una serie específica en términos de minutos vistos, minutos restantes y si la serie está completada o no.
 void AvanceSerie(Map *ListaSeries) {
     char nombreSerie[70];
     printf("Ingrese el nombre de la serie: ");
@@ -289,6 +294,7 @@ void AvanceSerie(Map *ListaSeries) {
     EnterContinuar();
 }
 
+//Permite al usuario actualizar el avance de una serie específica marcando los capítulos como completados.
 void ActualizarSerie(Map *ListaSeries) {
     char Nombre[70];
     printf("Ingrese el nombre de la serie:\n");
@@ -355,7 +361,7 @@ void ActualizarSerie(Map *ListaSeries) {
     EnterContinuar();
 }
 
-
+//Muestran los diferentes menús de opciones disponibles al usuario.
 void mostrarMenuPrincipal() 
 {
   limpiarPantalla();
@@ -395,7 +401,7 @@ void mostrarMenu2()
 }
 
 
-
+//Es la función principal que controla el flujo del programa. Aquí se realizan las llamadas a las funciones según la opción seleccionada por el usuario hasta que decide salir.
 int main(void) 
 {
   char opcion; 
